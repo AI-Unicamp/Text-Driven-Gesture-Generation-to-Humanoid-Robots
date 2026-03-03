@@ -19,11 +19,34 @@ Text Prompt  →  BVH Motion File  →  Retargeting  →  Pepper in Gazebo
 ## 🗂️ Repository Structure
 ```
 .
-├── BVH-generated-by-text-only/        # BVH motion files generated from text prompts
+├── BVH-generated-by-text-only/                    # BVH motion files generated from text prompts
 │   └── Tesis-2025/
-│       └── Sad_1.bvh                  # Example: "Sad" gesture sequence
-├── Do_odom_son_of_map.py              # Makes odom a child of map (fixed world frame)
-└── Retargeting-from-bvh_to_pepper.py  # Retargets BVH skeleton → Pepper joints
+│       └── Sad_1.bvh                              # Example: "Sad" gesture sequence
+├── Do_odom_son_of_map.py                          # Makes odom a child of map (fixed world frame)
+├── Retargeting-from-bvh_to_pepper.py              # Retargets BVH skeleton → Pepper joints
+└── bvh_broadcaster_v2_with_frame_map_added.py     # Broadcasts BVH skeleton as TF frames in RViz
+```
+
+---
+
+## 🧠 Pipeline
+```
+┌───────────────────────┐
+│     Text Prompt        │  e.g. "A person expressing sadness"
+└──────────┬────────────┘
+           ▼
+┌───────────────────────┐
+│  Text-to-Motion Model  │  Generates BVH skeleton animation
+└──────────┬────────────┘
+           ▼
+┌───────────────────────┐
+│   BVH Retargeting     │  Maps BVH joints → Pepper joint angles
+│   Script              │
+└──────────┬────────────┘
+           ▼
+┌───────────────────────┐
+│   Pepper in Gazebo    │  Animates robot via ROS joint controllers
+└───────────────────────┘
 ```
 
 ---
@@ -32,7 +55,7 @@ Text Prompt  →  BVH Motion File  →  Retargeting  →  Pepper in Gazebo
 
 ### Prerequisites
 
-- ROS (tested with ROS Noetic)
+- ROS Melodic
 - Gazebo
 - `pepper_gazebo_plugin` package
 - Python with ROS bindings (`rospy`)
@@ -41,7 +64,7 @@ Text Prompt  →  BVH Motion File  →  Retargeting  →  Pepper in Gazebo
 
 ### Terminal 1 — Launch Pepper in Gazebo
 
-Launches the Pepper robot simulation inside an office environment and initializes  
+Launches the Pepper robot simulation inside an office environment and initializes
 the full TF (transform) tree.
 ```bash
 roslaunch pepper_gazebo_plugin pepper_gazebo_plugin_in_office_CPU.launch
@@ -75,41 +98,50 @@ python Retargeting-from-bvh_to_pepper.py ./BVH-generated-by-text-only/Tesis-2025
 | Flag | Description |
 |------|-------------|
 | *(none)* | Play animation once |
-| `-l`     | Loop animation continuously |
+| `-l` | Loop animation continuously |
+
+---
+
+## 👁️ Visualizing the BVH Skeleton in RViz
+
+This is useful for **inspecting and understanding the joint structure** of the generated
+human motion before retargeting it to Pepper. You can verify joint names, hierarchy,
+and animation directly in RViz — without needing the full Gazebo simulation.
+
+### Terminal 1 — Launch RViz
+```bash
+rosrun rviz rviz -d `rospack find pepper_gazebo_plugin`/config/pepper_sensors.rviz
+```
+
+### Terminal 2 — Broadcast the BVH skeleton
+```bash
+cd pepper_sim_ws/src/scripts-funcionais/
+
+# Play once
+python bvh_broadcaster_v2_with_frame_map_added.py Happy_1.bvh world
+
+# Loop continuously
+python bvh_broadcaster_v2_with_frame_map_added.py Happy_1.bvh world -l
+```
+
+| Argument | Description |
+|----------|-------------|
+| `Happy_1.bvh` | BVH file to visualize |
+| `world` | Reference frame to publish the skeleton under |
+| `-l` | Loop animation continuously |
 
 ---
 
 ## 📦 BVH Files
 
-BVH motion files live under `BVH-generated-by-text-only/` and were generated using a  
-text-to-motion model. Each file encodes a full-body skeleton animation corresponding to  
+BVH motion files live under `BVH-generated-by-text-only/` and were generated using a
+text-to-motion model. Each file encodes a full-body skeleton animation corresponding to
 a specific emotion or gesture described in natural language.
 
 | File | Description |
 |------|-------------|
 | `Tesis-2025/Sad_1.bvh` | Sadness gesture sequence |
-
----
-
-## 🧠 Pipeline
-```
-┌───────────────────────┐
-│     Text Prompt        │  e.g. "A person expressing sadness"
-└──────────┬────────────┘
-           ▼
-┌───────────────────────┐
-│  Text-to-Motion Model  │  Generates BVH skeleton animation
-└──────────┬────────────┘
-           ▼
-┌───────────────────────┐
-│   BVH Retargeting     │  Maps BVH joints → Pepper joint angles
-│   Script              │
-└──────────┬────────────┘
-           ▼
-┌───────────────────────┐
-│   Pepper in Gazebo    │  Animates robot via ROS joint controllers
-└───────────────────────┘
-```
+| `Tesis-2025/Happy_1.bvh` | Happiness gesture sequence |
 
 ---
 
