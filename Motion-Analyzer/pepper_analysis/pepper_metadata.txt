@@ -1,0 +1,6 @@
+source_system=Pepper_ROS_Gazebo
+right_wrist_joint=r_wrist
+left_wrist_joint=l_wrist
+average_fps=30.065244225
+total_frames=341
+recording_duration=11.342

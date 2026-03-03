@@ -1,0 +1,6 @@
+total_duration=10.833225
+right_wrist_joint=b_r_wrist
+left_wrist_joint=b_l_wrist
+frame_time=0.033333
+source_file=../BVH-generated-by-text-only/Tesis-2025/Happy_1.bvh
+total_frames=326
