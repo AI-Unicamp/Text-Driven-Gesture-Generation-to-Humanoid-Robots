@@ -21,10 +21,17 @@ Text Prompt  →  BVH Motion File  →  Retargeting  →  Pepper in Gazebo
 .
 ├── BVH-generated-by-text-only/                    # BVH motion files generated from text prompts
 │   └── Tesis-2025/
-│       └── Sad_1.bvh                              # Example: "Sad" gesture sequence
+│       ├── Sad_1.bvh
+│       └── Happy_1.bvh
+├── Motion-Analyzer/                               # Scripts to analyze and compare motions
+│   ├── bvh_analyzer.py                            # Plots BVH joint trajectories
+│   ├── pepper_analyzer.py                         # Records and plots Pepper joint trajectories
+│   ├── motion_comparison.py                       # Compares BVH vs Pepper motion
+│   ├── bvh_analysis/                              # Output folder: BVH analysis plots
+│   └── pepper_analysis/                           # Output folder: Pepper analysis plots
 ├── Do_odom_son_of_map.py                          # Makes odom a child of map (fixed world frame)
-├── Retargeting-from-bvh_to_pepper.py              # Retargets BVH skeleton → Pepper joints
-└── bvh_broadcaster_v2_with_frame_map_added.py     # Broadcasts BVH skeleton as TF frames in RViz
+├── bvh_broadcaster_v2_with_frame_map_added.py     # Broadcasts BVH skeleton as TF frames in RViz
+└── Retargeting-from-bvh_to_pepper.py              # Retargets BVH skeleton → Pepper joints
 ```
 
 ---
@@ -104,9 +111,9 @@ python Retargeting-from-bvh_to_pepper.py ./BVH-generated-by-text-only/Tesis-2025
 
 ## 👁️ Visualizing the BVH Skeleton in RViz
 
-This is useful for **inspecting and understanding the joint structure** of the generated
-human motion before retargeting it to Pepper. You can verify joint names, hierarchy,
-and animation directly in RViz — without needing the full Gazebo simulation.
+Useful for **inspecting and understanding the joint structure** of the generated human motion
+before retargeting it to Pepper. You can verify joint names, hierarchy, and animation
+directly in RViz — without needing the full Gazebo simulation.
 
 ### Terminal 1 — Launch RViz
 ```bash
@@ -132,6 +139,33 @@ python bvh_broadcaster_v2_with_frame_map_added.py Happy_1.bvh world -l
 
 ---
 
+## 📊 Motion Analyzer
+
+The `Motion-Analyzer/` folder contains scripts to **plot, record, and compare** the joint
+trajectories of both the BVH skeleton and the Pepper robot. This is useful for evaluating
+the quality of the retargeting and understanding how faithfully Pepper reproduces the
+generated human motion.
+```bash
+cd pepper_sim_ws/src/scripts-funcionais/Motion-Analyzer/
+
+# Step 1: Plot BVH joint trajectories and save to output folder
+python bvh_analyzer.py ../BVH-generated-by-text-only/Tesis-2025/Happy_1.bvh --output-dir ./bvh_analysis/
+
+# Step 2: Record and plot Pepper joint trajectories and save to output folder
+python pepper_analyzer.py --output-dir ./pepper_analysis_1/
+
+# Step 3: Compare BVH motion vs Pepper motion
+python motion_comparison.py --bvh-data ./bvh_analysis/ --pepper-data ./pepper_analysis/
+```
+
+| Script | Description |
+|--------|-------------|
+| `bvh_analyzer.py` | Plots joint angle trajectories from a BVH file |
+| `pepper_analyzer.py` | Records and plots Pepper's joint trajectories from ROS topics |
+| `motion_comparison.py` | Side-by-side comparison of BVH vs Pepper motion curves |
+
+---
+
 ## 📦 BVH Files
 
 BVH motion files live under `BVH-generated-by-text-only/` and were generated using a
@@ -149,9 +183,9 @@ a specific emotion or gesture described in natural language.
 
 If you use this work, please cite:
 ```bibtex
-@misc{aiunicamp2025gestures,
+@misc{inofuente2025gestures,
   title  = {Text-Driven Gesture Generation to Humanoid Robots},
-  author = {AI-Unicamp},
+  author = {Kevin Adier Inofuente Colque},
   year   = {2025},
   url    = {https://github.com/AI-Unicamp/Text-Driven-Gesture-Generation-to-Humanoid-Robots}
 }
